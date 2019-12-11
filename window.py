@@ -1,6 +1,5 @@
 from tkinter import *
 from tkinter.ttk import *
-from typing import Final
 
 
 class MainWindow(Frame):
@@ -42,6 +41,6 @@ class MainWindow(Frame):
         else:
             self.pack_forget()
 
-    __TITLE__: Final = "Digit recognition"
-    __TRAIN_BTN_TEXT__: Final = "Train"
-    __PREDICT_BTN_TEXT__: Final = "Predict"
+    __TITLE__ = "Digit recognition"
+    __TRAIN_BTN_TEXT__ = "Train"
+    __PREDICT_BTN_TEXT__ = "Predict"
