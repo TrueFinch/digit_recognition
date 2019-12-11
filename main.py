@@ -5,8 +5,8 @@ from window import MainWindow
 def main() -> int:
     root = Tk()
     root.geometry("250x150+300+300")
+    root.resizable(False, False)
     app = MainWindow(root)
-    app.__TITLE__ = ""
     root.mainloop()
     return 0
 
