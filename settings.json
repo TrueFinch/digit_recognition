@@ -1,0 +1,5 @@
+{
+  "dataset_path": "/.keras/datasets/mnist.npz",
+  "model_path": "/.keras/models/model.yaml",
+  "model_weights_path": "/.keras/models/model.h5"
+}
