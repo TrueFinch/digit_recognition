@@ -7,6 +7,11 @@ from typing import Callable
 from utils import check_file_exists, get_cwd
 from PIL import Image
 import utils
+import cv2
+import matplotlib.pyplot as plt
+
+keras.backend.common.set_image_dim_ordering('th')
+keras.backend.image_data_format()
 
 
 class TrainHistory(keras.callbacks.Callback):
@@ -30,28 +35,34 @@ class TrainHistory(keras.callbacks.Callback):
         self.on_epoch_begin_callback()
 
 
-# class PredictCallback():
-
 class MyModel:
     def __init__(self):
         # check if model exist
         # if exist -> load else -> train
-        self.batch_size = 200
+        self.batch_size = 300
         self.num_classes = 10
         self.epochs = 20
 
         img_rows = img_cols = 28
         (x_train, y_train), (x_test, y_test) = mnist.load_data(get_cwd() + "/.keras/datasets/mnist.npz")
 
-        self.x_train = x_train.reshape(60000, 28, 28, 1)
-        self.x_test = x_test.reshape(10000, 28, 28, 1)
+        self.x_train = x_train.reshape(x_train.shape[0], 28, 28, 1).astype('float32')
+        self.x_test = x_test.reshape(x_test.shape[0], 28, 28, 1).astype('float32')
+        self.x_train = self.x_train / 255
+        self.x_test = self.x_test / 255
+        self.y_train = keras.utils.to_categorical(y_train)
+        self.y_test = keras.utils.to_categorical(y_test)
+        # num_classes = y_test.shape[1]
+
+        # self.x_train = x_train.reshape(60000, 28, 28, 1)
+        # self.x_test = x_test.reshape(10000, 28, 28, 1)
 
         print('x_train shape:', x_train.shape)
         print(x_train.shape[0], 'train_samples')
         print(x_test.shape[0], 'test_samples')
 
-        self.y_train = keras.utils.to_categorical(y_train, self.num_classes)
-        self.y_test = keras.utils.to_categorical(y_test, self.num_classes)
+        # self.y_train = keras.utils.to_categorical(y_train, self.num_classes)
+        # self.y_test = keras.utils.to_categorical(y_test, self.num_classes)
 
         self.model = None
         if check_file_exists(get_cwd() + "/.keras/models/model.h5") and check_file_exists(
@@ -81,19 +92,29 @@ class MyModel:
         # self.model.add(Dense(128, activation='relu'))
         # self.model.add(Dense(self.num_classes, activation='softmax'))
         # ====
-        self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
-        self.model.add(Conv2D(64, (3, 3), activation='relu'))
+        # self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
+        # self.model.add(Conv2D(64, (3, 3), activation='relu'))
+        # self.model.add(MaxPooling2D(pool_size=(2, 2)))
+        # self.model.add(Dropout(0.25))
+        # self.model.add(Flatten())
+        # self.model.add(Dense(128, activation='relu'))
+        # self.model.add(Dropout(0.5))
+        # ===
+        self.model.add(Conv2D(30, kernel_size=(5, 5), input_shape=(28, 28, 1), activation='relu'))
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
-        self.model.add(Dropout(0.25))
+        self.model.add(Conv2D(15, kernel_size=(3, 3), activation='relu'))
+        self.model.add(MaxPooling2D(pool_size=(2, 2)))
+        self.model.add(Dropout(0.2))
         self.model.add(Flatten())
         self.model.add(Dense(128, activation='relu'))
-        self.model.add(Dropout(0.5))
+        self.model.add(Dense(50, activation='relu'))
+        self.model.add(Dense(self.num_classes, activation='softmax'))
         self.model.compile(
             loss=keras.losses.categorical_crossentropy,
-            optimizer=keras.optimizers.Adadelta(),
+            optimizer=keras.optimizers.Adam(),
             metrics=['accuracy']
         )
-        self.model.add(Dense(self.num_classes, activation='softmax'))
+        # self.model.add(Dense(self.num_classes, activation='softmax'))
         try:
             self.model.fit(
                 self.x_train,
@@ -122,14 +143,19 @@ class MyModel:
         # img = image.img_to_array(image.load_img(path, target_size=(28, 28)))
         # img = np.expand_dims(img, axis=0)
         # img = img.reshape(28, 28)
-        img: Image = Image.open(path).resize((28, 28))
-        arr = utils.rgb2gray(np.array(img))
-        print(arr.shape)
-        arr = arr.reshape(1, 28, 28, 1)
-        result = self.model.predict(arr)
-        c = 0
-        for i in range(len(result[0])):
-            if result[0][i] > result[0][c]:
-                c = i
-        print(str(c))
+        # img: Image = Image.open(path).resize((28, 28))
+        # arr = utils.rgb2gray(np.array(img))
+        # print(arr.shape)
+        # arr = arr.reshape(1, 28, 28, 1)
+
+        im = cv2.imread(path, 0)
+        im2 = cv2.resize(im, (28, 28))
+        im = im2.reshape(28, 28, -1)
+        im = im.reshape(1, 28, 28, 1)
+        im = cv2.bitwise_not(im)
+        plt.imshow(im.reshape(28, 28), cmap='Greys')
+
+        result = self.model.predict(im)
+        a = np.argmax(result)
+        print(a)
         pass

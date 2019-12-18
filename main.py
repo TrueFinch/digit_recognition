@@ -27,7 +27,7 @@ def main() -> int:
 
     def predict_btn_listener(event):
         app.save_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
-        utils.prepare_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
+        img = utils.prepare_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
         model.predict(utils.get_cwd() + "/.keras/images/prepared_image.png")
 
     def predict_btn_callback():

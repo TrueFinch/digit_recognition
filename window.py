@@ -100,7 +100,7 @@ class MainWindow(Frame):
 
     def save_image(self, path):
         self.canvas.update()
-        self.canvas.postscript(file=path, colormode="color")
+        self.canvas.postscript(file=path, colormode="mono")
 
     is_first_epoch = True
     epoch_count = 1
