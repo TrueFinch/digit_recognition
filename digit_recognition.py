@@ -5,8 +5,6 @@ from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 import numpy as np
 from typing import Callable
 from utils import check_file_exists, get_cwd
-from PIL import Image
-import utils
 import cv2
 import matplotlib.pyplot as plt
 
@@ -39,9 +37,9 @@ class MyModel:
     def __init__(self):
         # check if model exist
         # if exist -> load else -> train
-        self.batch_size = 300
+        self.batch_size = 200
         self.num_classes = 10
-        self.epochs = 20
+        self.epochs = 50
 
         img_rows = img_cols = 28
         (x_train, y_train), (x_test, y_test) = mnist.load_data(get_cwd() + "/.keras/datasets/mnist.npz")
@@ -74,47 +72,21 @@ class MyModel:
 
     def train(self, pb_history: TrainHistory):
         self.model = Sequential()
-        # ===
-        # self.model.add(Conv2D(30, (5, 5), input_shape=(28, 28, 1), activation='relu'))
-        # self.model.add(MaxPooling2D())
-        # self.model.add(Conv2D(15, (3, 3), activation='relu'))
-        # self.model.add(MaxPooling2D())
-        # self.model.add(Dropout(0.2))
-        # self.model.add(Flatten())
-        # self.model.add(Dense(128, activation='relu'))
-        # self.model.add(Dense(50, activation='relu'))
-        # self.model.add(Dense(self.num_classes, activation='softmax'))
-        # ===
-        # self.model.add(Conv2D(32, (5, 5), input_shape=(28, 28, 1), activation='relu'))
-        # self.model.add(MaxPooling2D())
-        # self.model.add(Dropout(0.2))
-        # self.model.add(Flatten())
-        # self.model.add(Dense(128, activation='relu'))
-        # self.model.add(Dense(self.num_classes, activation='softmax'))
-        # ====
-        # self.model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(28, 28, 1)))
-        # self.model.add(Conv2D(64, (3, 3), activation='relu'))
-        # self.model.add(MaxPooling2D(pool_size=(2, 2)))
-        # self.model.add(Dropout(0.25))
-        # self.model.add(Flatten())
-        # self.model.add(Dense(128, activation='relu'))
-        # self.model.add(Dropout(0.5))
-        # ===
-        self.model.add(Conv2D(30, kernel_size=(5, 5), input_shape=(28, 28, 1), activation='relu'))
+        self.model.add(Conv2D(32, kernel_size=(5, 5), input_shape=(28, 28, 1), activation='relu'))
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
-        self.model.add(Conv2D(15, kernel_size=(3, 3), activation='relu'))
+        self.model.add(Conv2D(16, kernel_size=(3, 3), activation='relu'))
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
         self.model.add(Dropout(0.2))
         self.model.add(Flatten())
         self.model.add(Dense(128, activation='relu'))
-        self.model.add(Dense(50, activation='relu'))
+        self.model.add(Dense(64, activation='relu'))
         self.model.add(Dense(self.num_classes, activation='softmax'))
+
         self.model.compile(
             loss=keras.losses.categorical_crossentropy,
             optimizer=keras.optimizers.Adam(),
             metrics=['accuracy']
         )
-        # self.model.add(Dense(self.num_classes, activation='softmax'))
         try:
             self.model.fit(
                 self.x_train,
@@ -140,14 +112,6 @@ class MyModel:
         print("Model was saved to disk.")
 
     def predict(self, path: str):
-        # img = image.img_to_array(image.load_img(path, target_size=(28, 28)))
-        # img = np.expand_dims(img, axis=0)
-        # img = img.reshape(28, 28)
-        # img: Image = Image.open(path).resize((28, 28))
-        # arr = utils.rgb2gray(np.array(img))
-        # print(arr.shape)
-        # arr = arr.reshape(1, 28, 28, 1)
-
         im = cv2.imread(path, 0)
         im2 = cv2.resize(im, (28, 28))
         im = im2.reshape(28, 28, -1)
@@ -158,4 +122,5 @@ class MyModel:
         result = self.model.predict(im)
         a = np.argmax(result)
         print(a)
+        print(result)
         pass
