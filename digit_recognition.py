@@ -81,6 +81,8 @@ class MyModel:
             optimizer=keras.optimizers.Adam(),
             metrics=['accuracy']
         )
+
+        # option to interrupt training with saving model
         try:
             self.model.fit(
                 self.x_train,

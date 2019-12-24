@@ -1,0 +1,5 @@
+TODO: realize load settings from settings.json
+TODO: add option to draw plots of model stats
+TODO: try to retrain model
+TODO: add loading images from disk
+TODO: make sure it's working on windows
