@@ -3,10 +3,12 @@ from keras.datasets import mnist
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPooling2D
 import numpy as np
-from typing import Callable
+from typing import Callable, Optional
 from utils import check_file_exists, get_cwd
 import cv2
-import matplotlib.pyplot as plt
+
+seed = 25122019
+np.random.seed(seed)
 
 keras.backend.common.set_image_dim_ordering('th')
 keras.backend.image_data_format()
@@ -35,13 +37,12 @@ class TrainHistory(keras.callbacks.Callback):
 
 class MyModel:
     def __init__(self):
-        # check if model exist
-        # if exist -> load else -> train
         self.batch_size = 200
         self.num_classes = 10
         self.epochs = 50
 
-        img_rows = img_cols = 28
+        # check if model exist
+        # if exist -> load else -> train
         (x_train, y_train), (x_test, y_test) = mnist.load_data(get_cwd() + "/.keras/datasets/mnist.npz")
 
         self.x_train = x_train.reshape(x_train.shape[0], 28, 28, 1).astype('float32')
@@ -50,17 +51,10 @@ class MyModel:
         self.x_test = self.x_test / 255
         self.y_train = keras.utils.to_categorical(y_train)
         self.y_test = keras.utils.to_categorical(y_test)
-        # num_classes = y_test.shape[1]
-
-        # self.x_train = x_train.reshape(60000, 28, 28, 1)
-        # self.x_test = x_test.reshape(10000, 28, 28, 1)
 
         print('x_train shape:', x_train.shape)
         print(x_train.shape[0], 'train_samples')
         print(x_test.shape[0], 'test_samples')
-
-        # self.y_train = keras.utils.to_categorical(y_train, self.num_classes)
-        # self.y_test = keras.utils.to_categorical(y_test, self.num_classes)
 
         self.model = None
         if check_file_exists(get_cwd() + "/.keras/models/model.h5") and check_file_exists(
@@ -111,16 +105,17 @@ class MyModel:
         self.model.save_weights(get_cwd() + "/.keras/models/model.h5")
         print("Model was saved to disk.")
 
-    def predict(self, path: str):
+    def predict(self, path: str, predict_callback: Optional[Callable] = None):
         im = cv2.imread(path, 0)
         im2 = cv2.resize(im, (28, 28))
         im = im2.reshape(28, 28, -1)
         im = im.reshape(1, 28, 28, 1)
         im = cv2.bitwise_not(im)
-        plt.imshow(im.reshape(28, 28), cmap='Greys')
 
         result = self.model.predict(im)
         a = np.argmax(result)
         print(a)
         print(result)
+        if predict_callback is not None:
+            predict_callback(a)
         pass

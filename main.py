@@ -6,32 +6,30 @@ import utils
 
 def main() -> int:
     root = Tk()
-    root.geometry("300x170+300+300")
+    root.geometry("450x300+300+300")
     root.resizable(False, False)
     app = MainWindow(root)
     model = MyModel()
 
     def train_btn_listener(event):
-        app.train_btn.config(state=DISABLED)
-        app.predict_btn.config(state=DISABLED)
-        app.clear_btn.config(state=DISABLED)
+        app.enable_buttons(False)
         app.reload_pb()
         app.show_train_pg(True)
         model.train(pb_history)
 
     def train_btn_callback():
-        app.train_btn.config(state=NORMAL)
-        app.predict_btn.config(state=NORMAL)
-        app.clear_btn.config(state=NORMAL)
+        app.enable_buttons(True)
         app.show_train_pg(False)
 
-    def predict_btn_listener(event):
-        app.save_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
-        img = utils.prepare_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
-        model.predict(utils.get_cwd() + "/.keras/images/prepared_image.png")
+    def predict_btn_callback(value: int):
+        app.enable_buttons(True)
+        app.set_answer(value)
 
-    def predict_btn_callback():
-        pass
+    def predict_btn_listener(event):
+        app.enable_buttons(False)
+        app.save_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
+        utils.prepare_image(utils.get_cwd() + "/.keras/images/orig_image.ps")
+        model.predict(utils.get_cwd() + "/.keras/images/prepared_image.png", predict_btn_callback)
 
     pb_history = TrainHistory()
     pb_history.on_epoch_begin_callback = app.increase_epoch
@@ -39,7 +37,7 @@ def main() -> int:
     pb_history.on_train_end_callback = lambda: train_btn_callback()
 
     app.set_train_btn_listener(train_btn_listener)
-    app.set_predict_callback(predict_btn_listener)
+    app.set_predict_listener(predict_btn_listener)
     app.show_train_pg(False)
 
     root.mainloop()
